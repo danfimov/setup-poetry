@@ -1,6 +1,6 @@
-name: "danfimov/setup-poetry"
-description: "Set up your GitHub Actions workflow with a specific version of poetry."
-author: "danfimov"
+name: 'danfimov/setup-poetry'
+description: 'Set up your GitHub Actions workflow with a specific version of poetry.'
+author: 'danfimov'
 branding:
   icon: 'package'
   color: 'black'
