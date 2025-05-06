@@ -24,7 +24,7 @@ If you do not specify a version with `poetry-version` argument,  the latest vers
 - name: Install a specific version of poetry
   uses: danfimov/setup-poetry@v1
   with:
-    version: "2.1.2"
+    poetry-version: "2.1.2"
 ```
 
 ### Python version
