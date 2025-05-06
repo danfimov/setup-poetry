@@ -1,0 +1,67 @@
+name: "danfimov/setup-poetry"
+description: "Set up your GitHub Actions workflow with a specific version of poetry."
+author: "danfimov"
+branding:
+  icon: 'package'
+  color: 'black'
+
+inputs:
+  python-version:
+    description: Python version
+    required: false
+    default: '3.13'
+  poetry-version:
+    description: Poetry version
+    required: false
+    default: 'latest'
+  install-args:
+    description: Extra arguments to `poetry install`
+    required: false
+    default: '--no-interaction --no-root'
+
+runs:
+  using: 'composite'
+  steps:
+    #---------------------------#
+    #       Set-up python       #
+    #---------------------------#
+    - name: Set up python ${{ inputs.python-version }}
+      id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    #----------------------------------------#
+    #       Install & configure poetry       #
+    #----------------------------------------#
+    - name: Load cached poetry binary
+      id: cached-poetry-binary
+      uses: actions/cache@v4
+      with:
+        path: ~/.local
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: ${{ inputs.poetry-version }}
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    #----------------------------------------------#
+    #       Load cached venv if cache exists       #
+    #----------------------------------------------#
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}${{ inputs.install-args }}
+        # Restore cache with this prefix if not exact match with key
+        # Note cache-hit returns false in this case, so the below step will run
+        restore-keys: |
+          venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-
+    #----------------------------------------------------------#
+    #       Install dependencies if cache does not exist       #
+    #----------------------------------------------------------#
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      shell: bash
+      run: poetry install ${{ inputs.install-args }}
